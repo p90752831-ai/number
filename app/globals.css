@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root{color-scheme:dark}
+body{background:#0B0B0D;color:#F4F2EC;-webkit-font-smoothing:antialiased}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.up{animation:up .6s ease both}
+@layer components{
+ .btn-p{@apply inline-flex items-center justify-center rounded-full bg-acc px-6 py-3 font-semibold text-bg transition hover:brightness-110 active:scale-95 disabled:opacity-50}
+ .btn-s{@apply inline-flex items-center justify-center rounded-full border border-line bg-card px-6 py-3 font-semibold transition hover:border-acc active:scale-95}
+ .inp{@apply w-full rounded-2xl border border-line bg-card px-4 py-3 outline-none transition focus:border-acc}
+ .card{@apply rounded-3xl border border-line bg-card p-6}
+ .big{@apply font-extrabold leading-none tracking-tighter}
+}
