@@ -1,17 +1,17 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
-import Nav from '@/components/Nav'
+import type { Viewport } from 'next'
+import { Inter, Space_Grotesk } from 'next/font/google'
+import Shell from '@/components/Shell'
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'], variable: '--font-inter' })
-export const metadata = { title: 'NUMBER — Your identity. In one number.', description: 'One number. One profile.' }
+const num = Space_Grotesk({ subsets: ['latin'], variable: '--font-num', weight: ['500', '700'] })
+export const metadata = { title: 'Number# — твоя личность в одном номере', description: 'Уникальный номер вместо юзернейма. Профиль, подписки, записи.' }
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover' }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="min-h-screen font-sans">
-        <Nav />
-        <main className="mx-auto max-w-5xl px-5 pb-24 pt-6">{children}</main>
-      </body>
+    <html lang="ru" className={`${inter.variable} ${num.variable}`}>
+      <body className="min-h-screen font-sans"><Shell>{children}</Shell></body>
     </html>
   )
 }

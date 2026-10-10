@@ -7,7 +7,6 @@ export default function Qr({ number }: { number: number }) {
   const [copied, setCopied] = useState(false)
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => { setUrl(`${window.location.origin}/${number}`) }, [number])
-
   const download = () => {
     const c = box.current?.querySelector('canvas')
     if (!c) return
@@ -16,7 +15,7 @@ export default function Qr({ number }: { number: number }) {
   }
   const share = async () => {
     try {
-      if (navigator.share) { await navigator.share({ title: `#${number} on NUMBER`, url }); return }
+      if (navigator.share) { await navigator.share({ title: `#${number} в Number#`, url }); return }
       await navigator.clipboard.writeText(url)
       setCopied(true); setTimeout(() => setCopied(false), 2000)
     } catch {}
@@ -27,9 +26,9 @@ export default function Qr({ number }: { number: number }) {
         {url ? <QRCodeCanvas value={url} size={512} level="M" style={{ width: 200, height: 200 }} /> : <div style={{ width: 200, height: 200 }} />}
       </div>
       <p className="break-all text-sm text-mut">{url || '…'}</p>
-      <div className="flex gap-2">
-        <button onClick={share} className="btn-p">{copied ? 'Link copied' : 'Share profile'}</button>
-        <button onClick={download} className="btn-s">Download QR</button>
+      <div className="flex flex-wrap justify-center gap-2">
+        <button onClick={share} className="btn-p">{copied ? 'Ссылка скопирована' : 'Поделиться'}</button>
+        <button onClick={download} className="btn-s">Скачать QR</button>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import SearchForm from '@/components/SearchForm'
+import Avatar from '@/components/Avatar'
 import type { Profile } from '@/lib/types'
 
 export default async function Search({ searchParams }: { searchParams: { n?: string } }) {
@@ -12,17 +13,17 @@ export default async function Search({ searchParams }: { searchParams: { n?: str
     p = data as Profile | null
   }
   return (
-    <div className="flex flex-col gap-6 pt-4">
-      <h1 className="text-4xl font-extrabold tracking-tighter">Find a person by number</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-4xl font-extrabold tracking-tighter">Найти по номеру</h1>
       <SearchForm value={raw} />
-      {raw && !valid && <p className="text-red-400">Enter a number from 1 to 100000.</p>}
-      {valid && !p && <div className="card max-w-md"><p className="text-xl font-bold">This number is not registered yet.</p></div>}
+      {raw && !valid && <p className="text-red-400">Введите номер от 0 до 100000.</p>}
+      {valid && !p && <p className="py-6 text-xl font-bold">Этот номер пока не занят.</p>}
       {p && (
-        <div className="card up flex max-w-md items-center gap-4">
-          <div className="big text-5xl text-acc">#{p.number}</div>
-          <div className="flex-1"><p className="font-bold">{p.name || 'No name yet'}</p>{p.username && <p className="text-sm text-mut">@{p.username}</p>}</div>
-          <Link href={`/${p.number}`} className="btn-p !px-4 !py-2">View profile</Link>
-        </div>
+        <Link href={`/${p.number}`} className="card up flex items-center gap-4 transition hover:bg-line">
+          <span className="num text-5xl text-acc">#{p.number}</span>
+          <div className="min-w-0 flex-1"><p className="truncate font-bold">{p.name || 'Без имени'}</p>{p.is_private && <p className="text-sm text-mut">🔒 Закрытый профиль</p>}</div>
+          <Avatar url={p.avatar_url} size={48} />
+        </Link>
       )}
     </div>
   )

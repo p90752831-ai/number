@@ -8,7 +8,7 @@ Your identity. In one number. Next.js 14 + TypeScript + Tailwind + Supabase (Aut
 - RLS: читать профили можно всем (в `profiles` нет email), менять — только свой. Фото: бакет `avatars`, до 2 МБ, JPG/PNG/WebP, каждый пишет только в свою папку.
 
 ## Маршруты
-`/` · `/login` · `/register` · `/dashboard` · `/profile/edit` · `/search?n=728` · `/marketplace` (заглушка) · `/[number]` (например `/728`)
+`/` · `/login` · `/register` · `/dashboard` · `/profile/edit` · `/search?n=728` · `/feed` · `/follows` · `/[number]` (например `/728`)
 
 ## ЗАПУСК С НУЛЯ
 
@@ -44,7 +44,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=твой-anon-key
 4. **Профиль (14):** Edit profile → имя, username, bio, фото, ссылки → Save changes. Открой `/твой-номер` — всё отображается, email нигде не виден.
 5. **QR (15):** на странице профиля или в dashboard → Download QR; отсканируй телефоном, откроется `/твой-номер`.
 6. **Поиск (16):** на главной введи номер → View profile. Введи несвободный номер → "This number is not registered yet."
-7. **Marketplace (17):** /marketplace — все карточки "Coming soon", покупки нет.
 8. **Защита:** выйди и открой /dashboard → редирект на /login. Загрузи фото > 2 МБ → ошибка.
 
 ## ДЕПЛОЙ
@@ -57,7 +56,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=твой-anon-key
 6. **Свой домен:** Vercel → Project → Settings → Domains → Add → добавь DNS-записи у регистратора, как покажет Vercel. QR автоматически начнёт использовать новый домен.
 
 ## MVP CHECKLIST
-[x] Registration  [x] Login  [x] Random number  [x] Unique number (UNIQUE + trigger)  [x] Database  [x] Profile  [x] Avatar  [x] Social links  [x] Public profile  [x] Search  [x] QR  [x] Share  [x] Marketplace placeholder  [x] Mobile responsive  [x] Security (RLS, validation, upload limits)  [ ] Deployment (сделай по разделу выше)
+[x] Registration  [x] Login  [x] Random number  [x] Unique number (UNIQUE + trigger)  [x] Database  [x] Profile  [x] Avatar  [x] Social links  [x] Public profile  [x] Search  [x] QR  [x] Share  [x] Mobile responsive  [x] Security (RLS, validation, upload limits)  [ ] Deployment (сделай по разделу выше)
 
 ## Дизайн-система
 Шрифт Inter. Фон `#0B0B0D`, карточки `#16161A`, границы `#2A2A30`, текст `#F4F2EC`, приглушённый `#8A8A90`, акцент `#C8FF3D`. Кнопки и карточки полностью скруглены (`rounded-full` / `rounded-3xl`), номер `#728` — самый крупный элемент (`.big`). Классы: `.btn-p`, `.btn-s`, `.inp`, `.card` в `app/globals.css`.
@@ -65,3 +64,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=твой-anon-key
 ## Примечания
 - Если свободных номеров почти не останется, выдача замедлится (подбор случайных). Для 100000 мест на старте это не проблема.
 - Marketplace, платежи и т.п. намеренно не реализованы.
+
+## ВЕРСИЯ 4 (подписки, стена, лента, редизайн)
+1. SQL Editor → выполни целиком `supabase/migration-v4-all.sql` (после `schema.sql`; файл можно запускать повторно). Старые колонки (username, telegram, …) не удаляются.
+2. Замени файлы проекта, `npm install`, `npm run dev`, затем push.
+3. Проверка (нужны 2 аккаунта): подписка на открытый профиль → «Вы подписаны»; закрытый профиль → заявка, принять на `/follows`; запись на стене и в `/feed`; комментарий; ссылка «только подписчикам» не видна без подписки; фото в записи; «Показать ещё» после 10 записей.
+Торговой площадки номеров в проекте нет.

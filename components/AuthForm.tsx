@@ -1,11 +1,9 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -14,26 +12,28 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setMsg(null)
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg({ ok: false, t: 'Enter a valid email.' })
-    if (password.length < 8) return setMsg({ ok: false, t: 'Password must be at least 8 characters.' })
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setMsg({ ok: false, t: 'Введите корректную почту.' })
+    if (password.length < 8) return setMsg({ ok: false, t: 'Пароль — минимум 8 символов.' })
     setBusy(true)
     const sb = createClient()
     const { data, error } = reg ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password })
     setBusy(false)
-    if (error) return setMsg({ ok: false, t: reg ? `Registration failed: ${error.message}` : 'Wrong email or password.' })
-    if (reg && !data.session) return setMsg({ ok: true, t: 'Almost there — check your email to confirm, then log in.' })
-    router.push('/dashboard'); router.refresh()
+    if (error) return setMsg({ ok: false, t: reg ? `Не удалось зарегистрироваться: ${error.message}` : 'Неверная почта или пароль.' })
+    if (reg && data.user && data.user.identities?.length === 0) return setMsg({ ok: false, t: 'Эта почта уже зарегистрирована. Войдите.' })
+    if (reg && !data.session) return setMsg({ ok: true, t: 'Почти готово: подтвердите почту по письму, затем войдите.' })
+    window.location.href = '/'
   }
   return (
-    <form onSubmit={submit} className="card up mx-auto mt-8 flex max-w-sm flex-col gap-4">
-      <h1 className="text-3xl font-extrabold tracking-tighter">{reg ? 'Get your number' : 'Welcome back'}</h1>
-      <input className="inp" type="email" placeholder="Email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input className="inp" type="password" placeholder="Password (8+ characters)" autoComplete={reg ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} />
-      {msg && <p className={msg.ok ? 'text-acc' : 'text-red-400'}>{msg.t}</p>}
-      <button className="btn-p" disabled={busy}>{busy ? '…' : reg ? 'Register' : 'Log in'}</button>
+    <form onSubmit={submit} className="up mx-auto mt-6 flex max-w-sm flex-col gap-4">
+      <h1 className="text-4xl font-extrabold tracking-tighter">{reg ? 'Получи свой номер' : 'С возвращением'}</h1>
+      {reg && <p className="text-mut">Нужны только почта и пароль. Имя, фото и ссылки — позже, по желанию.</p>}
+      <input className="inp" type="email" placeholder="Почта" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
+      <input className="inp" type="password" placeholder="Пароль (от 8 символов)" autoComplete={reg ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} />
+      {msg && <p role="alert" className={msg.ok ? 'text-acc' : 'text-red-400'}>{msg.t}</p>}
+      <button className="btn-p" disabled={busy}>{busy ? 'Подождите…' : reg ? 'Зарегистрироваться' : 'Войти'}</button>
       <p className="text-center text-sm text-mut">
-        {reg ? <>Already have a number? <Link href="/login" className="text-fg underline">Log in</Link></>
-             : <>No number yet? <Link href="/register" className="text-fg underline">Register</Link></>}
+        {reg ? <>Уже есть номер? <Link href="/login" className="text-fg underline">Войти</Link></>
+             : <>Ещё нет номера? <Link href="/register" className="text-fg underline">Регистрация</Link></>}
       </p>
     </form>
   )

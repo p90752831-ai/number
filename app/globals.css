@@ -2,13 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 :root{color-scheme:dark}
-body{background:#0B0B0D;color:#F4F2EC;-webkit-font-smoothing:antialiased}
-@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.up{animation:up .6s ease both}
+html,body{background:#0A0A0B;color:#F5F3EE;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid #C8FF3D;outline-offset:2px}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse2{50%{opacity:.4}}
+.up{animation:up .5s cubic-bezier(.2,.7,.2,1) both}
+.skel{animation:pulse2 1.4s ease-in-out infinite;background:#131316;border-radius:1rem}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @layer components{
- .btn-p{@apply inline-flex items-center justify-center rounded-full bg-acc px-6 py-3 font-semibold text-bg transition hover:brightness-110 active:scale-95 disabled:opacity-50}
- .btn-s{@apply inline-flex items-center justify-center rounded-full border border-line bg-card px-6 py-3 font-semibold transition hover:border-acc active:scale-95}
- .inp{@apply w-full rounded-2xl border border-line bg-card px-4 py-3 outline-none transition focus:border-acc}
- .card{@apply rounded-3xl border border-line bg-card p-6}
- .big{@apply font-extrabold leading-none tracking-tighter}
+ .btn-p{@apply inline-flex items-center justify-center gap-2 rounded-full bg-acc px-6 py-3 font-semibold text-bg transition hover:brightness-110 active:scale-95 disabled:opacity-50}
+ .btn-s{@apply inline-flex items-center justify-center gap-2 rounded-full border border-line px-6 py-3 font-semibold transition hover:border-mut hover:bg-card active:scale-95 disabled:opacity-50}
+ .inp{@apply w-full rounded-2xl border border-line bg-card px-4 py-3 text-fg outline-none transition placeholder:text-mut focus:border-acc}
+ .card{@apply rounded-3xl bg-card p-6}
+ .pill{@apply inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-medium transition hover:bg-line}
+ .num{@apply font-num font-bold leading-none tracking-tighter}
 }
