@@ -51,7 +51,7 @@ export default function PostCard({ post, me, onDelete, onSaved }: { post: Post; 
     onDelete(post.id)
   }
   return (
-    <article className="border-t border-line py-5">
+    <article id={`post-${post.id}`} className="scroll-mt-24 border-t border-line py-5">
       <header className="flex items-center gap-3">
         <NextLink href={`/${a?.number ?? ''}`}><Avatar url={a?.avatar_url} /></NextLink>
         <div className="min-w-0 flex-1">
@@ -95,7 +95,7 @@ export default function PostCard({ post, me, onDelete, onSaved }: { post: Post; 
           ) : <p className="text-sm text-mut">Войдите, чтобы комментировать.</p>}
         </div>
       )}
-      {err && <p role="alert" className="mt-2 text-sm text-red-400">{err}</p>}
+      {err && <p role="alert" className="mt-2 text-sm text-err">{err}</p>}
     </article>
   )
 }

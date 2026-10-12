@@ -16,7 +16,7 @@ export default async function Feed() {
   const { data: ps } = await sb.from('posts').select('*, profiles(number,name,avatar_url)').in('user_id', ids)
     .order('created_at', { ascending: false }).range(0, PAGE - 1)
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <h1 className="text-4xl font-extrabold tracking-tighter">Лента</h1>
       <Composer me={user.id} />
       <PostList initial={(ps ?? []) as Post[]} userIds={ids} me={user.id} empty="Здесь пока пусто. Подпишитесь на людей по номеру — их записи появятся в ленте." />

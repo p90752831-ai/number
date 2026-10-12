@@ -1,49 +1,82 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import Icon from './Icon'
 import LogoutButton from './LogoutButton'
-
-const P: Record<string, React.ReactNode> = {
-  home: <path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
-  feed: <path d="M4 6h16M4 12h16M4 18h10" />,
-  search: <><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></>,
-  users: <><circle cx="9" cy="8" r="3.5" /><path d="M2 20c0-3.5 3-5 7-5s7 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2.5.5 4 2 4 5" /></>,
-  user: <><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></>,
-  settings: <><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></>,
-}
-const Icon = ({ n }: { n: string }) => (
-  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{P[n]}</svg>
-)
+import ThemeToggle from './ThemeToggle'
 
 export default function NavClient({ number }: { number: number | null }) {
   const path = usePathname()
-  const items = [
-    { href: '/', label: 'Главная', icon: 'home' },
+  const [open, setOpen] = useState(false)
+  const me = number !== null ? `/${number}` : '/dashboard'
+  const main = [
     { href: '/feed', label: 'Лента', icon: 'feed' },
     { href: '/search', label: 'Поиск', icon: 'search' },
-    { href: '/follows', label: 'Подписки', icon: 'users' },
-    { href: number !== null ? `/${number}` : '/dashboard', label: 'Профиль', icon: 'user' },
+    { href: me, label: 'Профиль', icon: 'user' },
   ]
-  const side = [...items, { href: '/profile/edit', label: 'Настройки', icon: 'settings' }]
-  const cls = (h: string) => (path === h ? 'bg-card text-fg' : 'text-mut hover:text-fg')
+  const extra = [
+    { href: '/dashboard', label: 'Мой номер', icon: 'hash' },
+    { href: '/profile/edit', label: 'Настройки', icon: 'settings' },
+  ]
+  useEffect(() => { setOpen(false) }, [path])
+  useEffect(() => {
+    if (!open) return
+    const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', k)
+    return () => document.removeEventListener('keydown', k)
+  }, [open])
+  const cur = (h: string) => (path === h ? 'page' : undefined)
+  const cls = (h: string) => `navlink ${path === h ? 'is-active' : ''}`
+
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col gap-1 border-r border-line px-4 py-6 md:flex" aria-label="Навигация">
-        <Link href="/" className="num mb-6 px-3 text-2xl">Number<span className="text-acc">#</span></Link>
-        {side.map(i => (
-          <Link key={i.href} href={i.href} aria-current={path === i.href ? 'page' : undefined} className={`flex items-center gap-3 rounded-2xl px-3 py-3 font-medium transition ${cls(i.href)}`}>
-            <Icon n={i.icon} />{i.label}
-          </Link>
-        ))}
-        <div className="mt-auto px-3 text-sm text-mut"><LogoutButton className="hover:text-fg">Выйти</LogoutButton></div>
+      {/* desktop: collapsed rail, opens on hover or keyboard focus, overlays content (no layout shift) */}
+      <aside className="side fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-line bg-bg md:flex" aria-label="Основная навигация">
+        <Link href="/" aria-label="Number# — на главную" className="relative flex h-20 items-center px-[26px]">
+          <span className="num logo-short text-2xl text-acc">#</span>
+          <span className="num logo-full absolute left-[26px] whitespace-nowrap text-xl">Number<span className="text-acc">#</span></span>
+        </Link>
+        <nav className="flex flex-col gap-1">
+          {[...main, ...extra].map(i => (
+            <Link key={i.href} href={i.href} title={i.label} aria-current={cur(i.href)} className={cls(i.href)}>
+              <Icon n={i.icon} /><span className="lbl">{i.label}</span>
+            </Link>
+          ))}
+        </nav>
+        <div className="mt-auto flex flex-col gap-1 pb-5">
+          <ThemeToggle variant="nav" />
+          <LogoutButton className="navlink"><Icon n="logout" /><span className="lbl">Выйти</span></LogoutButton>
+        </div>
       </aside>
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-bg/90 backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} aria-label="Навигация">
-        {items.map(i => (
-          <Link key={i.href} href={i.href} aria-current={path === i.href ? 'page' : undefined} className={`flex flex-1 flex-col items-center gap-1 py-3 text-[11px] transition ${path === i.href ? 'text-acc' : 'text-mut'}`}>
-            <Icon n={i.icon} />{i.label}
-          </Link>
-        ))}
-      </nav>
+
+      {/* mobile: logo bar, bottom tabs, tap-to-open sheet */}
+      <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center border-b border-line bg-bg/90 px-5 backdrop-blur md:hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+        <Link href="/" className="num text-xl" aria-label="Number# — на главную">Number<span className="text-acc">#</span></Link>
+      </header>
+      {open && <button aria-label="Закрыть меню" className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setOpen(false)} />}
+      <div className="fixed inset-x-0 bottom-0 z-40 md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {open && (
+          <div id="more-sheet" role="dialog" aria-label="Меню" className="mx-3 mb-2 flex flex-col gap-1 rounded-3xl border border-line bg-card p-3 shadow-xl">
+            {extra.map(i => (
+              <Link key={i.href} href={i.href} aria-current={cur(i.href)} className={`${cls(i.href)} !m-0 !w-full`}><Icon n={i.icon} />{i.label}</Link>
+            ))}
+            <div className="flex items-center justify-between px-3 py-2"><span className="text-sm text-mut">Оформление</span><ThemeToggle variant="segment" /></div>
+            <LogoutButton className="navlink !m-0 !w-full"><Icon n="logout" />Выйти</LogoutButton>
+          </div>
+        )}
+        <nav className="flex border-t border-line bg-bg/95 backdrop-blur" aria-label="Основная навигация">
+          {main.map(i => (
+            <Link key={i.href} href={i.href} aria-current={cur(i.href)} className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${path === i.href ? 'text-acc' : 'text-mut'}`}>
+              <Icon n={i.icon} />{i.label}
+            </Link>
+          ))}
+          <button type="button" aria-expanded={open} aria-controls="more-sheet" onClick={() => setOpen(!open)}
+            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${open ? 'text-acc' : 'text-mut'}`}>
+            <Icon n="more" />Ещё
+          </button>
+        </nav>
+      </div>
     </>
   )
 }

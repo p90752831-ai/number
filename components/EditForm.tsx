@@ -6,6 +6,7 @@ import { KINDS } from '@/lib/links'
 import type { Link, LinkKind, Profile } from '@/lib/types'
 import Avatar from './Avatar'
 import LogoutButton from './LogoutButton'
+import ThemeToggle from './ThemeToggle'
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
@@ -48,7 +49,7 @@ export default function EditForm({ profile, initialLinks }: { profile: Profile; 
     setMsg({ ok: true, t: 'Сохранено.' }); router.refresh()
   }
   return (
-    <form onSubmit={save} className="up flex flex-col gap-6">
+    <form onSubmit={save} className="mx-auto flex max-w-xl flex-col gap-6">
       <h1 className="text-3xl font-extrabold tracking-tighter">Настройки <span className="num text-acc">#{profile.number}</span></h1>
       <div className="flex items-center gap-4">
         <Avatar url={avatar} size={80} />
@@ -61,7 +62,7 @@ export default function EditForm({ profile, initialLinks }: { profile: Profile; 
         <textarea className="inp" rows={3} maxLength={240} value={bio} onChange={e => setBio(e.target.value)} placeholder="Пара слов о себе" />
       </label>
       <label className="flex items-start gap-3 rounded-2xl bg-card p-4">
-        <input type="checkbox" className="mt-1 h-5 w-5 accent-[#C8FF3D]" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} />
+        <input type="checkbox" className="mt-1 h-5 w-5 accent-[rgb(var(--acc))]" checked={isPrivate} onChange={e => setIsPrivate(e.target.checked)} />
         <span><b>Закрытый профиль</b><br /><span className="text-sm text-mut">Подписаться можно только по заявке, которую вы одобряете. Записи и ссылки «только подписчикам» видят одобренные подписчики. В открытом профиле подписка одобряется сразу.</span></span>
       </label>
       <div className="flex flex-col gap-3">
@@ -86,7 +87,8 @@ export default function EditForm({ profile, initialLinks }: { profile: Profile; 
         ))}
         {links.length < 10 && <button type="button" className="btn-s !py-2 text-sm" onClick={() => setLinks([...links, { kind: 'telegram', label: null, url: '', visibility: 'public' }])}>+ Добавить ссылку</button>}
       </div>
-      {msg && <p role="status" className={msg.ok ? 'text-acc' : 'text-red-400'}>{msg.t}</p>}
+      <div className="flex items-center justify-between gap-3"><span className="text-sm text-mut">Оформление</span><ThemeToggle variant="segment" /></div>
+      {msg && <p role="status" className={msg.ok ? 'text-acc' : 'text-err'}>{msg.t}</p>}
       <button className="btn-p" disabled={busy}>{busy ? 'Сохраняем…' : 'Сохранить'}</button>
       <LogoutButton className="btn-s md:hidden">Выйти из аккаунта</LogoutButton>
     </form>

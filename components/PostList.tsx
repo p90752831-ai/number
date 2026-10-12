@@ -31,7 +31,7 @@ export default function PostList({ initial, userIds, me, empty }: { initial: Pos
           onDelete={id => setPosts(posts.filter(x => x.id !== id))}
           onSaved={(id, body) => setPosts(posts.map(x => (x.id === id ? { ...x, body, updated_at: new Date().toISOString() } : x)))} />
       ))}
-      {err && <p role="alert" className="py-2 text-center text-sm text-red-400">{err}</p>}
+      {err && <p role="alert" className="py-2 text-center text-sm text-err">{err}</p>}
       {!done && <div className="pt-4 text-center"><button className="btn-s" disabled={busy} onClick={more}>{busy ? 'Загрузка…' : 'Показать ещё'}</button></div>}
     </div>
   )

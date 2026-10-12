@@ -36,7 +36,7 @@ export default function FollowButton({ me, other, mine, theirs }: { me: string; 
         {mine?.status === 'accepted' && <><span className="font-semibold text-acc">Вы подписаны</span><button disabled={busy} className={sm} onClick={() => del(mine.id)}>Отписаться</button></>}
         {theirs?.status === 'accepted' && <button disabled={busy} className={sm} onClick={() => del(theirs.id)}>Удалить подписчика</button>}
       </div>
-      {err && <p className="text-center text-sm text-red-400">{err}</p>}
+      {err && <p className="text-center text-sm text-err">{err}</p>}
     </div>
   )
 }

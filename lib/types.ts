@@ -5,3 +5,4 @@ export type Follow = { id: string; follower: string; following: string; status: 
 export type Author = { number: number; name: string | null; avatar_url: string | null }
 export type Post = { id: string; user_id: string; body: string; image_url: string | null; created_at: string; updated_at: string; profiles: Author | null }
 export type Comment = { id: string; post_id: string; user_id: string; body: string; created_at: string; profiles: Author | null }
+export type Person = { id: string; number: number; name: string | null; avatar_url: string | null }

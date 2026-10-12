@@ -14,14 +14,14 @@ export default async function Dashboard() {
   if (!user) redirect('/login')
   const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle()
   const p = data as Profile | null
-  if (!p) return <div className="card break-all"><p>Профиль не найден.</p><p className="text-sm text-red-400">{error ? error.message : 'строки нет, ошибки нет'}</p></div>
+  if (!p) return <div className="break-all"><p>Профиль не найден.</p><p className="text-sm text-err">{error ? error.message : 'строки нет, ошибки нет'}</p></div>
   const { count } = await sb.from('follows').select('id', { count: 'exact', head: true }).eq('following', user.id).eq('status', 'pending')
   const pct = completion(p)
   return (
-    <div className="flex flex-col gap-6">
-      <section className="up text-center">
-        <p className="text-sm font-semibold tracking-widest text-mut">ВАШ НОМЕР</p>
-        <div className="num my-3 text-[30vw] text-acc sm:text-[9rem]">#{p.number}</div>
+    <div className="mx-auto flex max-w-md flex-col gap-6">
+      <section className="text-center">
+        <p className="text-mut">Ваш номер</p>
+        <div className="num my-3 text-[26vw] text-acc md:text-[7rem]">#{p.number}</div>
         <div className="flex flex-wrap justify-center gap-2">
           <Link href={`/${p.number}`} className="btn-p">Мой профиль</Link>
           <CopyNumber number={p.number} />
@@ -31,10 +31,10 @@ export default async function Dashboard() {
         <div>
           <div className="mb-1 flex justify-between text-sm text-mut"><span>Профиль заполнен</span><span>{pct}%</span></div>
           <div className="h-2 rounded-full bg-line"><div className="h-2 rounded-full bg-acc transition-all" style={{ width: `${pct}%` }} /></div>
-          <Link href="/profile/edit" className="mt-3 inline-block text-sm text-acc hover:underline">Заполнить →</Link>
+          <Link href="/profile/edit" className="mt-3 inline-block text-sm text-acc hover:underline">Заполнить профиль</Link>
         </div>
       )}
-      {!!count && <Link href="/follows" className="card text-center text-acc">Новых заявок на подписку: {count} →</Link>}
+      {!!count && <Link href="/follows" className="card text-center text-acc">Новых заявок на подписку: {count}</Link>}
       <Qr number={p.number} />
     </div>
   )

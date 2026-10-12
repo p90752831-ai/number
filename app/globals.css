@@ -1,19 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root{color-scheme:dark}
-html,body{background:#0A0A0B;color:#F5F3EE;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
-:focus-visible{outline:2px solid #C8FF3D;outline-offset:2px}
-@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes pulse2{50%{opacity:.4}}
-.up{animation:up .5s cubic-bezier(.2,.7,.2,1) both}
-.skel{animation:pulse2 1.4s ease-in-out infinite;background:#131316;border-radius:1rem}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-@layer components{
- .btn-p{@apply inline-flex items-center justify-center gap-2 rounded-full bg-acc px-6 py-3 font-semibold text-bg transition hover:brightness-110 active:scale-95 disabled:opacity-50}
- .btn-s{@apply inline-flex items-center justify-center gap-2 rounded-full border border-line px-6 py-3 font-semibold transition hover:border-mut hover:bg-card active:scale-95 disabled:opacity-50}
- .inp{@apply w-full rounded-2xl border border-line bg-card px-4 py-3 text-fg outline-none transition placeholder:text-mut focus:border-acc}
- .card{@apply rounded-3xl bg-card p-6}
- .pill{@apply inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-medium transition hover:bg-line}
- .num{@apply font-num font-bold leading-none tracking-tighter}
+
+/* ---- themes: one set of variables, no duplicated markup ---- */
+:root, [data-theme='light'] {
+  color-scheme: light;
+  --bg: 244 244 248; --card: 255 255 255; --line: 224 226 237; --fg: 13 16 33; --mut: 94 98 117;
+  --acc: 51 64 255; --accfg: 255 255 255; --err: 194 38 59;
+}
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: 10 12 22; --card: 20 24 48; --line: 38 43 74; --fg: 237 238 247; --mut: 154 158 184;
+  --acc: 139 147 255; --accfg: 10 12 22; --err: 255 122 138;
+}
+html, body { background: rgb(var(--bg)); color: rgb(var(--fg)); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+
+/* ---- focus system ----
+   Links/buttons: outline follows their own rounded shape.
+   Text fields: the ring is drawn by the rounded field itself (.inp or .field), never by the bare inner <input>. */
+:focus-visible { outline: 2px solid rgb(var(--acc)); outline-offset: 2px; }
+input:not([type='checkbox']):not([type='radio']):focus-visible, textarea:focus-visible, select:focus-visible { outline: none; }
+.inp:focus, .field:focus-within { border-color: rgb(var(--acc)); box-shadow: 0 0 0 3px rgb(var(--acc) / 0.2); }
+.field[data-invalid='true'] { border-color: rgb(var(--err)); box-shadow: 0 0 0 3px rgb(var(--err) / 0.18); }
+.bare { border: 0; border-radius: 0; padding: 0; background: transparent; outline: none; color: inherit; }
+.bare::placeholder { color: rgb(var(--mut)); }
+
+/* ---- collapsible side panel (desktop) ---- */
+.side { width: 72px; transition: width .22s cubic-bezier(.2,.7,.2,1) .28s, box-shadow .22s ease .28s; overflow: hidden; }
+.side:hover, .side:focus-within { width: 248px; transition-delay: .08s; box-shadow: 8px 0 32px rgb(0 0 0 / .12); }
+.side .lbl, .side .logo-full { opacity: 0; transition: opacity .15s ease .28s; }
+.side:hover .lbl, .side:focus-within .lbl, .side:hover .logo-full, .side:focus-within .logo-full { opacity: 1; transition-delay: .12s; }
+.side .logo-short { transition: opacity .15s ease .28s; }
+.side:hover .logo-short, .side:focus-within .logo-short { opacity: 0; transition-delay: 0s; }
+.navlink { display: flex; align-items: center; gap: 1rem; height: 3rem; margin: 0 10px; padding: 0 15px; border-radius: 9999px; color: rgb(var(--mut)); white-space: nowrap; transition: background-color .15s, color .15s; width: calc(100% - 20px); font-weight: 500; }
+.navlink:hover { color: rgb(var(--fg)); background: rgb(var(--fg) / .05); }
+.navlink.is-active { color: rgb(var(--acc)); background: rgb(var(--acc) / .12); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes pulse2 { 50% { opacity: .45; } }
+.rise { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; }
+.skel { animation: pulse2 1.4s ease-in-out infinite; background: rgb(var(--card)); border-radius: 1rem; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+@layer components {
+  .btn-p { @apply inline-flex items-center justify-center gap-2 rounded-full bg-acc px-6 py-3 font-semibold text-accfg transition hover:brightness-110 active:scale-[.97] disabled:opacity-50; }
+  .btn-s { @apply inline-flex items-center justify-center gap-2 rounded-full border border-line px-6 py-3 font-semibold transition hover:bg-card active:scale-[.97] disabled:opacity-50; }
+  .inp { @apply w-full rounded-2xl border border-line bg-card px-4 py-3 text-fg outline-none transition placeholder:text-mut; }
+  .field { @apply border border-line bg-card transition; }
+  .card { @apply rounded-3xl bg-card p-6; }
+  .pill { @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-4 py-2 text-sm font-medium transition hover:border-mut; }
+  .num { @apply font-num font-bold leading-none tracking-tight; }
 }

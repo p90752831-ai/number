@@ -24,12 +24,12 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     window.location.href = '/'
   }
   return (
-    <form onSubmit={submit} className="up mx-auto mt-6 flex max-w-sm flex-col gap-4">
+    <form onSubmit={submit} className="mx-auto mt-6 flex max-w-sm flex-col gap-4">
       <h1 className="text-4xl font-extrabold tracking-tighter">{reg ? 'Получи свой номер' : 'С возвращением'}</h1>
       {reg && <p className="text-mut">Нужны только почта и пароль. Имя, фото и ссылки — позже, по желанию.</p>}
       <input className="inp" type="email" placeholder="Почта" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} />
       <input className="inp" type="password" placeholder="Пароль (от 8 символов)" autoComplete={reg ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} />
-      {msg && <p role="alert" className={msg.ok ? 'text-acc' : 'text-red-400'}>{msg.t}</p>}
+      {msg && <p role="alert" className={msg.ok ? 'text-acc' : 'text-err'}>{msg.t}</p>}
       <button className="btn-p" disabled={busy}>{busy ? 'Подождите…' : reg ? 'Зарегистрироваться' : 'Войти'}</button>
       <p className="text-center text-sm text-mut">
         {reg ? <>Уже есть номер? <Link href="/login" className="text-fg underline">Войти</Link></>

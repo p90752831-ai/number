@@ -167,3 +167,12 @@ create policy "posts upload own" on storage.objects for insert to authenticated
   with check (bucket_id = 'posts' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "posts delete own" on storage.objects for delete to authenticated
   using (bucket_id = 'posts' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- 7) Table privileges (RLS still decides which rows). Needed on projects where new tables get no default grants.
+grant select on public.profiles to anon, authenticated;
+grant update on public.profiles to authenticated;
+grant select, insert, delete on public.follows to authenticated;
+grant update (status) on public.follows to authenticated;
+grant select on public.profile_links, public.posts, public.comments to anon;
+grant select, insert, update, delete on public.profile_links, public.posts to authenticated;
+grant select, insert, delete on public.comments to authenticated;
