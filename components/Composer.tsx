@@ -2,11 +2,12 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import Icon from './Icon'
+import { useI18n } from './I18nProvider'
 
 const TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 export default function Composer({ me }: { me: string }) {
+  const { t } = useI18n()
   const sb = createClient()
   const router = useRouter()
   const area = useRef<HTMLTextAreaElement>(null)
@@ -19,8 +20,8 @@ export default function Composer({ me }: { me: string }) {
   function pick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
     if (!f) return
-    if (!TYPES.includes(f.type)) return setErr('Фото: JPG, PNG или WebP.')
-    if (f.size > 3 * 1024 * 1024) return setErr('Фото должно быть меньше 3 МБ.')
+    if (!TYPES.includes(f.type)) return setErr(t('photo.err_type'))
+    if (f.size > 3 * 1024 * 1024) return setErr(t('photo.err_size', { mb: 3 }))
     setErr(''); setFile(f)
   }
   async function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -31,12 +32,12 @@ export default function Composer({ me }: { me: string }) {
     if (file) {
       const path = `${me}/${crypto.randomUUID()}.${file.type.split('/')[1]}`
       const up = await sb.storage.from('posts').upload(path, file, { contentType: file.type })
-      if (up.error) { setBusy(false); return setErr(`Не удалось загрузить фото: ${up.error.message}`) }
+      if (up.error) { setBusy(false); return setErr(t('photo.err_upload', { m: up.error.message })) }
       image_url = sb.storage.from('posts').getPublicUrl(path).data.publicUrl
     }
     const { error } = await sb.from('posts').insert({ user_id: me, body: body.trim(), image_url })
     setBusy(false)
-    if (error) return setErr(`Не удалось опубликовать: ${error.message}`)
+    if (error) return setErr(t('composer.err', { m: error.message }))
     setBody(''); setFile(null); if (area.current) area.current.style.height = 'auto'
     router.refresh()
   }
@@ -45,12 +46,12 @@ export default function Composer({ me }: { me: string }) {
   return (
     <form onSubmit={submit} className="field flex flex-col gap-3 rounded-3xl p-4">
       <textarea ref={area} rows={2} maxLength={2000} value={body} onChange={e => { setBody(e.target.value); grow() }}
-        placeholder="Что нового?" aria-label="Текст записи" className="bare block w-full resize-none text-base leading-relaxed" />
-      {file && <p className="flex items-center gap-2 text-sm text-mut"><span className="truncate">{file.name}</span><button type="button" className="underline hover:text-fg" onClick={() => setFile(null)}>убрать</button></p>}
+        placeholder={t('composer.placeholder')} aria-label={t('composer.aria')} className="bare block w-full resize-none text-base leading-relaxed" />
+      {file && <p className="flex items-center gap-2 text-sm text-mut"><span className="truncate">{file.name}</span><button type="button" className="underline hover:text-fg" onClick={() => setFile(null)}>{t('composer.remove')}</button></p>}
       {err && <p role="alert" className="text-sm text-err">{err}</p>}
       <div className="flex items-center justify-between">
-        <label className="btn-s cursor-pointer !px-4 !py-2 text-sm">Фото<input type="file" accept={TYPES.join(',')} onChange={pick} className="hidden" /></label>
-        <button className="btn-p !py-2" disabled={busy || (!body.trim() && !file)}>{busy ? 'Публикуем…' : 'Опубликовать'}</button>
+        <label className="btn-s cursor-pointer !px-4 !py-2 text-sm">{t('composer.photo')}<input type="file" accept={TYPES.join(',')} onChange={pick} className="hidden" /></label>
+        <button className="btn-p !py-2" disabled={busy || (!body.trim() && !file)}>{busy ? t('composer.busy') : t('composer.publish')}</button>
       </div>
     </form>
   )

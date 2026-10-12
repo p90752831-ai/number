@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
+import { useI18n } from './I18nProvider'
 
 export default function Qr({ number }: { number: number }) {
+  const { t } = useI18n()
   const [url, setUrl] = useState('')
   const [copied, setCopied] = useState(false)
   const box = useRef<HTMLDivElement>(null)
@@ -15,7 +17,7 @@ export default function Qr({ number }: { number: number }) {
   }
   const share = async () => {
     try {
-      if (navigator.share) { await navigator.share({ title: `#${number} в Number#`, url }); return }
+      if (navigator.share) { await navigator.share({ title: `#${number} — Number#`, url }); return }
       await navigator.clipboard.writeText(url)
       setCopied(true); setTimeout(() => setCopied(false), 2000)
     } catch {}
@@ -27,8 +29,8 @@ export default function Qr({ number }: { number: number }) {
       </div>
       <p className="break-all text-sm text-mut">{url || '…'}</p>
       <div className="flex flex-wrap justify-center gap-2">
-        <button onClick={share} className="btn-p">{copied ? 'Ссылка скопирована' : 'Поделиться'}</button>
-        <button onClick={download} className="btn-s">Скачать QR</button>
+        <button onClick={share} className="btn-p">{copied ? t('qr.copied') : t('qr.share')}</button>
+        <button onClick={download} className="btn-s">{t('qr.download')}</button>
       </div>
     </div>
   )

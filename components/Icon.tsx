@@ -11,6 +11,8 @@ const P: Record<string, React.ReactNode> = {
   x: <path d="M6 6l12 12M18 6L6 18" />,
   lock: <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
   back: <path d="M15 5l-7 7 7 7" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></>,
 }
 export default function Icon({ n, size = 22 }: { n: string; size?: number }) {
   return (

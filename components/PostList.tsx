@@ -4,8 +4,10 @@ import { createClient } from '@/lib/supabase/client'
 import { PAGE } from '@/lib/const'
 import type { Post } from '@/lib/types'
 import PostCard from './PostCard'
+import { useI18n } from './I18nProvider'
 
-export default function PostList({ initial, userIds, me, empty }: { initial: Post[]; userIds: string[]; me: string | null; empty: string }) {
+export default function PostList({ initial, userIds, me, empty, canManage = false }: { initial: Post[]; userIds: string[]; me: string | null; empty: string; canManage?: boolean }) {
+  const { t } = useI18n()
   const sb = createClient()
   const [posts, setPosts] = useState<Post[]>(initial)
   const [done, setDone] = useState(initial.length < PAGE)
@@ -18,7 +20,7 @@ export default function PostList({ initial, userIds, me, empty }: { initial: Pos
     const { data, error } = await sb.from('posts').select('*, profiles(number,name,avatar_url)').in('user_id', userIds)
       .order('created_at', { ascending: false }).range(posts.length, posts.length + PAGE - 1)
     setBusy(false)
-    if (error) return setErr('Не удалось загрузить записи. Попробуйте ещё раз.')
+    if (error) return setErr(t('posts.err_load'))
     const next = (data ?? []) as Post[]
     setPosts([...posts, ...next])
     if (next.length < PAGE) setDone(true)
@@ -27,12 +29,12 @@ export default function PostList({ initial, userIds, me, empty }: { initial: Pos
   return (
     <div>
       {posts.map(p => (
-        <PostCard key={p.id} post={p} me={me}
+        <PostCard key={p.id} post={p} me={me} canManage={canManage}
           onDelete={id => setPosts(posts.filter(x => x.id !== id))}
           onSaved={(id, body) => setPosts(posts.map(x => (x.id === id ? { ...x, body, updated_at: new Date().toISOString() } : x)))} />
       ))}
       {err && <p role="alert" className="py-2 text-center text-sm text-err">{err}</p>}
-      {!done && <div className="pt-4 text-center"><button className="btn-s" disabled={busy} onClick={more}>{busy ? 'Загрузка…' : 'Показать ещё'}</button></div>}
+      {!done && <div className="pt-4 text-center"><button className="btn-s" disabled={busy} onClick={more}>{busy ? t('common.loading') : t('common.more')}</button></div>}
     </div>
   )
 }

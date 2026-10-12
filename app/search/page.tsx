@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getT } from '@/lib/i18n-server'
 import SearchForm from '@/components/SearchForm'
 import Avatar from '@/components/Avatar'
 import type { Profile } from '@/lib/types'
 
 export default async function Search({ searchParams }: { searchParams: { n?: string } }) {
+  const { t } = getT()
   const raw = (searchParams.n ?? '').replace(/^#/, '').trim()
   const valid = /^\d{1,6}$/.test(raw)
   let p: Profile | null = null
@@ -14,14 +16,18 @@ export default async function Search({ searchParams }: { searchParams: { n?: str
   }
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
-      <h1 className="text-4xl font-extrabold tracking-tighter">Найти по номеру</h1>
+      <h1 className="text-4xl font-bold tracking-tight">{t('search.title')}</h1>
       <SearchForm value={raw} />
-      {raw && !valid && <p className="text-err">Введите номер от 0 до 100000.</p>}
-      {valid && !p && <p className="py-6 text-xl font-bold">Этот номер пока не занят.</p>}
+      {raw && !valid && <p className="text-err">{t('search.err')}</p>}
+      {valid && !p && <p className="py-6 text-xl font-bold">{t('search.none')}</p>}
       {p && (
         <Link href={`/${p.number}`} className="card flex items-center gap-4 transition hover:bg-line">
           <span className="num text-5xl text-acc">#{p.number}</span>
-          <div className="min-w-0 flex-1"><p className="truncate font-bold">{p.name || 'Без имени'}</p>{p.is_private && <p className="text-sm text-mut">🔒 Закрытый профиль</p>}</div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-bold">{p.name || t('common.no_name')}</p>
+            {p.kind === 'community' && <p className="text-sm text-acc">{t('community.badge')}</p>}
+            {p.is_private && <p className="text-sm text-mut">{t('profile.private')}</p>}
+          </div>
           <Avatar url={p.avatar_url} size={48} />
         </Link>
       )}

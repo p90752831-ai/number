@@ -2,15 +2,17 @@
 import { useState } from 'react'
 import NextLink from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ago } from '@/lib/time'
+import { ago } from '@/lib/i18n'
+import { useI18n } from './I18nProvider'
 import type { Comment, Post } from '@/lib/types'
 import Avatar from './Avatar'
 
 const SEL = '*, profiles(number,name,avatar_url)'
 
-export default function PostCard({ post, me, onDelete, onSaved }: { post: Post; me: string | null; onDelete: (id: string) => void; onSaved: (id: string, body: string) => void }) {
+export default function PostCard({ post, me, canManage = false, onDelete, onSaved }: { post: Post; me: string | null; canManage?: boolean; onDelete: (id: string) => void; onSaved: (id: string, body: string) => void }) {
+  const { t, lang } = useI18n()
   const sb = createClient()
-  const own = me === post.user_id
+  const own = me === post.user_id || canManage
   const a = post.profiles
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(post.body)
@@ -43,7 +45,7 @@ export default function PostCard({ post, me, onDelete, onSaved }: { post: Post; 
     setEditing(false); onSaved(post.id, body)
   }
   async function remove() {
-    if (!window.confirm('Удалить запись?')) return
+    if (!window.confirm(t('post.confirm_delete'))) return
     const { error } = await sb.from('posts').delete().eq('id', post.id)
     if (error) return setErr(error.message)
     const path = post.image_url?.split('/posts/')[1]
@@ -56,27 +58,27 @@ export default function PostCard({ post, me, onDelete, onSaved }: { post: Post; 
         <NextLink href={`/${a?.number ?? ''}`}><Avatar url={a?.avatar_url} /></NextLink>
         <div className="min-w-0 flex-1">
           <NextLink href={`/${a?.number ?? ''}`} className="font-semibold hover:underline">{a?.name || `#${a?.number ?? '?'}`}</NextLink>
-          <div className="text-sm text-mut"><span className="num">#{a?.number}</span> · <span suppressHydrationWarning>{ago(post.created_at)}</span>{post.updated_at !== post.created_at && ' · изменено'}</div>
+          <div className="text-sm text-mut"><span className="num">#{a?.number}</span> · <span suppressHydrationWarning>{ago(lang, post.created_at)}</span>{post.updated_at !== post.created_at && ` · ${t('post.edited')}`}</div>
         </div>
         {own && !editing && (
           <div className="flex gap-3 text-sm text-mut">
-            <button className="hover:text-fg" onClick={() => setEditing(true)}>Изменить</button>
-            <button className="hover:text-fg" onClick={remove}>Удалить</button>
+            <button className="hover:text-fg" onClick={() => setEditing(true)}>{t('common.edit')}</button>
+            <button className="hover:text-fg" onClick={remove}>{t('common.delete')}</button>
           </div>
         )}
       </header>
       {editing ? (
         <div className="mt-3 flex flex-col gap-2">
           <textarea className="inp" rows={3} maxLength={2000} value={text} onChange={e => setText(e.target.value)} />
-          <div className="flex gap-2"><button className="btn-p !py-2" onClick={save}>Сохранить</button><button className="btn-s !py-2" onClick={() => { setEditing(false); setText(post.body) }}>Отмена</button></div>
+          <div className="flex gap-2"><button className="btn-p !py-2" onClick={save}>{t('common.save')}</button><button className="btn-s !py-2" onClick={() => { setEditing(false); setText(post.body) }}>{t('common.cancel')}</button></div>
         </div>
       ) : post.body && <p className="mt-3 whitespace-pre-wrap break-words">{post.body}</p>}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {post.image_url && <img src={post.image_url} alt="" loading="lazy" className="mt-3 max-h-[28rem] w-full rounded-2xl object-cover" />}
-      <button onClick={toggle} className="mt-3 text-sm text-mut hover:text-fg" aria-expanded={open}>{open ? 'Скрыть комментарии' : 'Комментарии'}</button>
+      <button onClick={toggle} className="mt-3 text-sm text-mut hover:text-fg" aria-expanded={open}>{open ? t('comments.hide') : t('comments.title')}</button>
       {open && (
         <div className="mt-3 flex flex-col gap-3">
-          {comments.length === 0 && <p className="text-sm text-mut">Комментариев пока нет.</p>}
+          {comments.length === 0 && <p className="text-sm text-mut">{t('comments.none')}</p>}
           {comments.map(c => (
             <div key={c.id} className="flex gap-3 text-sm">
               <Avatar url={c.profiles?.avatar_url} size={28} />
@@ -84,15 +86,15 @@ export default function PostCard({ post, me, onDelete, onSaved }: { post: Post; 
                 <NextLink href={`/${c.profiles?.number ?? ''}`} className="font-semibold hover:underline">{c.profiles?.name || `#${c.profiles?.number}`}</NextLink>{' '}
                 <span className="break-words text-fg/90">{c.body}</span>
               </div>
-              {(c.user_id === me || own) && <button className="text-mut hover:text-fg" aria-label="Удалить комментарий" onClick={() => delComment(c.id)}>✕</button>}
+              {(c.user_id === me || own) && <button className="text-mut hover:text-fg" aria-label={t('comments.delete')} onClick={() => delComment(c.id)}>✕</button>}
             </div>
           ))}
           {me ? (
             <form onSubmit={addComment} className="flex gap-2">
-              <input className="inp !py-2" maxLength={500} value={ctext} onChange={e => setCtext(e.target.value)} placeholder="Написать комментарий" aria-label="Комментарий" />
+              <input className="inp !py-2" maxLength={500} value={ctext} onChange={e => setCtext(e.target.value)} placeholder={t('comments.placeholder')} aria-label={t('comments.aria')} />
               <button className="btn-p !px-4 !py-2" disabled={busy || !ctext.trim()}>→</button>
             </form>
-          ) : <p className="text-sm text-mut">Войдите, чтобы комментировать.</p>}
+          ) : <p className="text-sm text-mut">{t('comments.login')}</p>}
         </div>
       )}
       {err && <p role="alert" className="mt-2 text-sm text-err">{err}</p>}

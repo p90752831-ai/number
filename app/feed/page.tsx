@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getT } from '@/lib/i18n-server'
 import Composer from '@/components/Composer'
 import PostList from '@/components/PostList'
 import { PAGE } from '@/lib/const'
@@ -8,6 +9,7 @@ import type { Post } from '@/lib/types'
 export const dynamic = 'force-dynamic'
 
 export default async function Feed() {
+  const { t } = getT()
   const sb = createClient()
   const { data: { user } } = await sb.auth.getUser()
   if (!user) redirect('/login')
@@ -17,9 +19,9 @@ export default async function Feed() {
     .order('created_at', { ascending: false }).range(0, PAGE - 1)
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <h1 className="text-4xl font-extrabold tracking-tighter">Лента</h1>
+      <h1 className="text-4xl font-bold tracking-tight">{t('nav.feed')}</h1>
       <Composer me={user.id} />
-      <PostList initial={(ps ?? []) as Post[]} userIds={ids} me={user.id} empty="Здесь пока пусто. Подпишитесь на людей по номеру — их записи появятся в ленте." />
+      <PostList initial={(ps ?? []) as Post[]} userIds={ids} me={user.id} empty={t('feed.empty')} />
     </div>
   )
 }
